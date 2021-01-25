@@ -6,6 +6,7 @@
 [Ll]ogs/
 [Pp]lugins
 ProjectSettings
+.vscode
 
 # Meta files
 *.meta
