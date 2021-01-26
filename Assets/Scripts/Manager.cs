@@ -84,7 +84,6 @@ public class Manager : MonoBehaviour
     void updateDigitLabel(){
         if(!errorDisplayed){
             digitLabel.text = currentVal.ToString();
-            storedDigitLabel.text = storedVal.ToString();
         }
         displayValid = false;
     }
@@ -92,10 +91,13 @@ public class Manager : MonoBehaviour
     /*Evaluate the calculation based on the passed operator*/
     void calcResult(char activeOp){
         switch(activeOp){
-            case '=': result = currentVal; break;
-            case '+': result = storedVal + currentVal; break;
-            case '-': result = storedVal - currentVal; break;
-            case 'x': result = storedVal * currentVal; break;
+            //plus, minus operator cases needed
+            case 'x':
+                result = storedVal * currentVal;
+                currentVal = result;
+                updateDigitLabel();
+                break;
+
             case '÷':
                 if(currentVal != 0){
                     result = (storedVal / currentVal);
@@ -103,19 +105,34 @@ public class Manager : MonoBehaviour
                     errorDisplayed = true;
                     digitLabel.text = "ERROR";
                 }
+                currentVal = result;
+                updateDigitLabel();
                 break;
-            default: Debug.Log("unknown" + activeOp); break;
+
+            case '=':
+                result = currentVal;
+                break;
+                
+            default: Debug.Log("unknown" + activeOp);
+            
+            break;
         }
-        currentVal = result;
-        updateDigitLabel();
     }
 
     public void buttonTapped(char caption){
-        if(errorDisplayed) clearCalc();
+        
+        //If there's an error displayed then reset
+        if(errorDisplayed){
+            clearCalc();
+        }
 
+        /* If the button clicked is a number or a dot
+        then evaluate the validity of the input and update the calculator display,
+        inform that it shows a valid value */
         if((caption >= '0' && caption<= '9') || caption == '.'){
             if(digitLabel.text.Length < 15 || !displayValid){
-                if(!displayValid) digitLabel.text = (caption == '.'? "0": "");
+                if(!displayValid)
+                    digitLabel.text = (caption == '.'? "0": "");
                 else if (digitLabel.text == "0" && caption != '.')
                     digitLabel.text = "";
                 
@@ -124,22 +141,34 @@ public class Manager : MonoBehaviour
             }
         }
 
+        //Otherwise if the C button is clicked
         else if(caption == 'c'){
-            clearCalc();
+            //clear the calculator session
         }
 
+        //Otherwise if the polarity sign is clicked,
+        //then convert the polarity and update the calculator display
+        //inform a special sign has been used
         else if(caption == '±'){
             currentVal = -double.Parse(digitLabel.text);
             updateDigitLabel();
             specialAction = true;
         }
 
+        //Otherwise if the modularity sign is clicked,
+        //then convert the value to modular and update the calculator display
+        //inform a special sign has been used
         else if(caption == '%'){
             currentVal = double.Parse(digitLabel.text)/100.0d;
             updateDigitLabel();
             specialAction = true;
         }
 
+        /*
+        Otherwise if the calculator shows a valid number,
+        OR the operator that's been used is "equals",
+        OR a special sign has been used, then do the following
+        */
         else if (displayValid || storedOperator == '=' || specialAction){
             currentVal = double.Parse(digitLabel.text);
             displayValid = false;
